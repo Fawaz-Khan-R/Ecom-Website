@@ -3,15 +3,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using FluentValidation;
 using FluentValidation.AspNetCore;
+using FluentValidation;
 using dotnetapp.Models;
 using dotnetapp.DbContext;
 using dotnetapp.Repositories;
 using dotnetapp.Services;
-using dotnetapp.Validators; // Import Validators namespace
+using dotnetapp.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Kestrel to listen on port 8080 on all network interfaces
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 // Entity Framework Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -37,10 +40,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-// MVC Controllers and FluentValidation
-builder.Services.AddControllers()
-       .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateProductValidator>());
-
+// Controllers + FluentValidation
+builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 
 // Repository Registrations
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -54,10 +57,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
+// Swagger with JWT Bearer support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce API", Version = "v1" });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme.",
@@ -66,6 +71,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -96,7 +102,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Development Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -104,9 +109,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("AllowAngularApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
