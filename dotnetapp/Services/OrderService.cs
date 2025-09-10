@@ -23,5 +23,20 @@ namespace dotnetapp.Services
         {
             return await _orderRepository.GetByIdAsync(id);
         }
+
+        public async Task CreateOrderAsync(Order order)
+        {
+            await _orderRepository.AddAsync(order);
+        }
+
+        public async Task UpdateOrderAsync(Order order)
+        {
+            await _orderRepository.UpdateAsync(order);
+        }
+
+        public async Task DeleteOrderAsync(int id)
+        {
+            await _orderRepository.DeleteAsync(id);
+        }
     }
 }

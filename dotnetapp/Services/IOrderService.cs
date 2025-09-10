@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using dotnetapp.Models;
 
 namespace dotnetapp.Services
@@ -8,6 +8,8 @@ namespace dotnetapp.Services
     {
         Task<IEnumerable<Order>> GetAllOrdersAsync();
         Task<Order> GetOrderByIdAsync(int id);
-        // Other service methods
+        Task CreateOrderAsync(Order order);
+        Task UpdateOrderAsync(Order order);
+        Task DeleteOrderAsync(int id);
     }
 }
