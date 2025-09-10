@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using dotnetapp.Models;
+using dotnetapp.Data;
 using dotnetapp.Repositories;
 using dotnetapp.Services;
 

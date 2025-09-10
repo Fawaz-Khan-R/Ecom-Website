@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using dotnetapp.Data;
+using dotnetapp.Models;
+using dotnetapp.DTOs;
+using dotnetapp.Repositories;
 namespace dotnetapp.Repositories
 {
 
@@ -52,6 +55,38 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
         }
         
         return await query.Include(p => p.Seller).ToListAsync();
+    }
+
+    public Product GetProductById(int id)
+    {
+        return _dbSet.Find(id);
+    }
+
+    public IEnumerable<Product> GetAllProducts()
+    {
+        return _dbSet.ToList();
+    }
+
+    public void AddProduct(Product product)
+    {
+        _dbSet.Add(product);
+        _context.SaveChanges();
+    }
+
+    public void UpdateProduct(Product product)
+    {
+        _dbSet.Update(product);
+        _context.SaveChanges();
+    }
+
+    public void DeleteProduct(int id)
+    {
+        var product = _dbSet.Find(id);
+        if (product != null)
+        {
+            _dbSet.Remove(product);
+            _context.SaveChanges();
+        }
     }
 }
 }
