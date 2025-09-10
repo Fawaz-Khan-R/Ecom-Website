@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using dotnetapp.Data;
+using dotnetapp.DbContext;
 using dotnetapp.Models;
 using dotnetapp.DTOs;
 using dotnetapp.Repositories;

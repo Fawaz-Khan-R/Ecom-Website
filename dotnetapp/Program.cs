@@ -6,15 +6,14 @@ using Microsoft.OpenApi.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using dotnetapp.Models;
-using dotnetapp.Data;
+using dotnetapp.DbContext;
 using dotnetapp.Repositories;
 using dotnetapp.Services;
+using dotnetapp.Validators; // Import Validators namespace
 
-
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Entity Framework Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -38,22 +37,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-// FluentValidation
+// MVC Controllers and FluentValidation
+builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>(); // Reference a real validator class
 
-// Repository Registration
+// Repository Registrations
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
 
-// Service Registration
+// Service Registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -82,7 +81,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
@@ -96,7 +95,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure pipeline
+// Development Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
