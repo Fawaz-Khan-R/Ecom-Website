@@ -74,7 +74,7 @@ namespace dotnetapp.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm, string category)
+        public async Task<IEnumerable<Product>> SearchAsync(string searchTerm, string category)
         {
             var query = _dbSet.Where(p => p.Status == ProductStatus.Approved);
 
