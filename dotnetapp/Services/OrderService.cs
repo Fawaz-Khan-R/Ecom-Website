@@ -1,0 +1,27 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using dotnetapp.Models;
+using dotnetapp.Repositories;
+
+namespace dotnetapp.Services
+{
+    public class OrderService : IOrderService
+    {
+        private readonly IOrderRepository _orderRepository;
+
+        public OrderService(IOrderRepository orderRepository)
+        {
+            _orderRepository = orderRepository;
+        }
+
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        {
+            return await _orderRepository.GetAllAsync();
+        }
+
+        public async Task<Order> GetOrderByIdAsync(int id)
+        {
+            return await _orderRepository.GetByIdAsync(id);
+        }
+    }
+}

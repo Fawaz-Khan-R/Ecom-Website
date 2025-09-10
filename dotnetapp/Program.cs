@@ -38,9 +38,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAutoMapper(typeof(Program));
 
 // MVC Controllers and FluentValidation
-builder.Services.AddControllers();
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>(); // Reference a real validator class
+builder.Services.AddControllers()
+       .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateProductValidator>());
+
 
 // Repository Registrations
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
