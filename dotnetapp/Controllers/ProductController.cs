@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using dotnetapp.DTOs;
 using dotnetapp.Services;
 using System.Security.Claims;
+using dotnetapp.Models;
 
 
 namespace dotnetapp.Controllers
@@ -13,67 +14,41 @@ namespace dotnetapp.Controllers
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly IProductService _productService;
-        
-        public ProductController(IProductService productService)
+        private readonly IProductService _service;
+        public ProductController(IProductService service)
         {
-            _productService = productService;
+            _service = service;
         }
-        
+
+        // Example minimal endpoint
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(
-            [FromQuery] string searchTerm = "",
-            [FromQuery] string category = "")
-        {
-            if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(category))
-            {
-                var searchResults = await _productService.SearchProductsAsync(searchTerm, category);
-                return Ok(searchResults);
-            }
-            
-            var products = await _productService.GetApprovedProductsAsync();
-            return Ok(products);
-        }
-        
-        [HttpPost]
-        [Authorize(Roles = "Seller")]
-        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto dto)
-        {
-            var sellerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var product = await _productService.CreateProductAsync(dto, sellerId);
-            return CreatedAtAction(nameof(GetProductById), new { id = product.ProductId }, product);
-        }
-        
+        public IActionResult Get() => Ok("Product service is available.");
+
+        [HttpGet("all")]
+        public IActionResult GetAll() => Ok(_service.GetAllProducts());
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProductById(int id)
+        public IActionResult Get(int id) => Ok(_service.GetProductById(id));
+
+        [HttpPost]
+        public IActionResult Create(Product product)
         {
-            var product = await _productService.GetProductByIdAsync(id);
-            if (product == null)
-                return NotFound();
-            
-            return Ok(product);
+            _service.CreateProduct(product);
+            return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
         }
-        
+
         [HttpPut("{id}")]
-        [Authorize(Roles = "Seller")]
-        public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] UpdateProductDto dto)
+        public IActionResult Update(int id, Product product)
         {
-            var sellerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            
-            try
-            {
-                var product = await _productService.UpdateProductAsync(id, dto, sellerId);
-                return Ok(product);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            _service.UpdateProduct(id, product);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            _service.DeleteProduct(id);
+            return NoContent();
         }
     }
 }

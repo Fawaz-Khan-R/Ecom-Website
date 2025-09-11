@@ -1,0 +1,18 @@
+<form (ngSubmit)="onSubmit()">
+  <label>Name:</label>
+  <input [(ngModel)]="product.name" name="name" required />
+
+  <label>Price:</label>
+  <input type="number" [(ngModel)]="product.price" name="price" required />
+
+  <label>Quantity:</label>
+  <input type="number" [(ngModel)]="product.quantity" name="quantity" required />
+
+  <label>Description:</label>
+  <input [(ngModel)]="product.description" name="description" />
+
+  <label>Category:</label>
+  <input [(ngModel)]="product.category" name="category" />
+
+  <button type="submit">Save</button>
+</form>

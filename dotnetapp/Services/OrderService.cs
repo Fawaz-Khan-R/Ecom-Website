@@ -1,42 +1,34 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using dotnetapp.Models;
-using dotnetapp.Repositories;
 
 namespace dotnetapp.Services
 {
     public class OrderService : IOrderService
     {
-        private readonly IOrderRepository _orderRepository;
-
-        public OrderService(IOrderRepository orderRepository)
+        private readonly List<Order> _orders = new();
+        public IEnumerable<Order> GetAllOrders() => _orders;
+        public Order GetOrderById(int id) => _orders.FirstOrDefault(o => o.Id == id);
+        public void CreateOrder(Order order)
         {
-            _orderRepository = orderRepository;
+            order.Id = _orders.Count + 1;
+            _orders.Add(order);
         }
-
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public void UpdateOrder(int id, Order order)
         {
-            return await _orderRepository.GetAllAsync();
+            var existing = GetOrderById(id);
+            if (existing != null)
+            {
+                existing.ProductId = order.ProductId;
+                existing.Quantity = order.Quantity;
+                existing.Status = order.Status;
+            }
         }
-
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public void DeleteOrder(int id)
         {
-            return await _orderRepository.GetByIdAsync(id);
-        }
-
-        public async Task CreateOrderAsync(Order order)
-        {
-            await _orderRepository.AddAsync(order);
-        }
-
-        public async Task UpdateOrderAsync(Order order)
-        {
-            await _orderRepository.UpdateAsync(order);
-        }
-
-        public async Task DeleteOrderAsync(int id)
-        {
-            await _orderRepository.DeleteAsync(id);
+            var order = GetOrderById(id);
+            if (order != null)
+                _orders.Remove(order);
         }
     }
 }

@@ -75,8 +75,8 @@ namespace dotnetapp.Services
 
         public async Task<string> GenerateJwtTokenAsync(User user)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -88,7 +88,7 @@ namespace dotnetapp.Services
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                audience: jwtSettings["Issuer"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials);
@@ -98,9 +98,9 @@ namespace dotnetapp.Services
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var jwtSettings = _configuration.GetSection("Jwt");
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]);
+            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
             try
             {
@@ -109,7 +109,7 @@ namespace dotnetapp.Services
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
+                    ValidAudience = jwtSettings["Issuer"],
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ClockSkew = TimeSpan.Zero

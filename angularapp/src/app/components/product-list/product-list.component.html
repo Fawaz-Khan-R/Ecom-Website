@@ -1,0 +1,34 @@
+<div>
+  <h2>Product List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.price }}</td>
+        <td>{{ product.quantity }}</td>
+        <td>{{ product.description }}</td>
+        <td>{{ product.category }}</td>
+        <td>
+          <button (click)="selectProduct(product)">Edit</button>
+          <button (click)="deleteProduct(product.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 *ngIf="selectedProduct">Edit Product</h3>
+  <h3 *ngIf="!selectedProduct">Add Product</h3>
+  <app-product-form [product]="selectedProduct || {id:0,name:'',price:0,quantity:0,description:'',category:''}" (save)="saveProduct($event)"></app-product-form>
+</div>
