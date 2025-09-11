@@ -3,18 +3,20 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using FluentValidation;
 using FluentValidation.AspNetCore;
+using FluentValidation;
 using dotnetapp.Models;
-using dotnetapp.Data;
+using dotnetapp.DbContext;
 using dotnetapp.Repositories;
 using dotnetapp.Services;
+using dotnetapp.Validators;
 
-
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Configure Kestrel to listen on port 8080 on all network interfaces
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
+
+// Entity Framework Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -38,26 +40,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-// FluentValidation
+// Controllers + FluentValidation
+builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 
-// Repository Registration
+// Repository Registrations
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRequestRepository, ProductRequestRepository>();
 
-// Service Registration
+// Service Registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
-builder.Services.AddControllers();
+// Swagger with JWT Bearer support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce API", Version = "v1" });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme.",
@@ -66,6 +71,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -82,7 +88,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
@@ -96,7 +102,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -104,9 +109,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("AllowAngularApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
