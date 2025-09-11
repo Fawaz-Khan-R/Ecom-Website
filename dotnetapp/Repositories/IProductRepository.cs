@@ -10,6 +10,7 @@ namespace dotnetapp.Repositories
         Task<Product> GetByIdAsync(int id);
         Task<Product> AddAsync(Product product);
         Task UpdateAsync(Product product);
+        Task DeleteProductAsync(int id);
         Task<IEnumerable<Product>> SearchAsync(string searchTerm, string category);
         Task<IEnumerable<Product>> GetBySellerIdAsync(int sellerId);
         Task<IEnumerable<Product>> GetApprovedProductsAsync();

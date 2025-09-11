@@ -23,6 +23,7 @@ public class ProductRequest
     // Navigation properties
     public virtual Product Product { get; set; }
     public virtual User Seller { get; set; }
+    public virtual ICollection<ProductRequest> ProductRequests { get; set; } // Added navigation property
 }
 
 

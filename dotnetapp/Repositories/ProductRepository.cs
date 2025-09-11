@@ -9,8 +9,8 @@ namespace dotnetapp.Repositories
 {
     public class ProductRepository : GenericRepository<Product>, IProductRepository
     {
-        private readonly ApplicationDbContext _context;
-        private readonly DbSet<Product> _dbSet;
+        public new readonly ApplicationDbContext _context;
+        public new readonly DbSet<Product> _dbSet;
 
         public ProductRepository(ApplicationDbContext context) : base(context)
         {
@@ -61,22 +61,14 @@ namespace dotnetapp.Repositories
         public async Task<IEnumerable<Product>> GetApprovedProductsAsync()
         {
             return await _dbSet
-                .Where(p => p.Status == ProductStatus.Approved && p.Quantity > 0)
-                .Include(p => p.Seller)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsByStatusAsync(ProductStatus status)
-        {
-            return await _dbSet
-                .Where(p => p.Status == status)
+                .Where(p => p.Status.Equals(dotnetapp.Models.ProductStatus.Approved) && p.Quantity > 0)
                 .Include(p => p.Seller)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> SearchAsync(string searchTerm, string category)
         {
-            var query = _dbSet.Where(p => p.Status == ProductStatus.Approved);
+            var query = _dbSet.Where(p => p.Status.Equals(dotnetapp.Models.ProductStatus.Approved));
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
@@ -89,6 +81,14 @@ namespace dotnetapp.Repositories
             }
 
             return await query.Include(p => p.Seller).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByStatusAsync(ProductStatus status)
+        {
+            return await _dbSet
+                .Where(p => p.Status.Equals(status))
+                .Include(p => p.Seller)
+                .ToListAsync();
         }
     }
 }
